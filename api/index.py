@@ -1,13 +1,5 @@
 from flask import Flask , request , jsonify
 import requests , json , random
-
-def select(a):
-    list = ["ACGN","POEM","OTHER","LYRICS"]
-    if str.upper(str(a)) in list :
-        return str.upper(str(a))
-    else :
-        return random.choice(list)
-
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
@@ -15,41 +7,7 @@ app.config['JSON_AS_ASCII'] = False
 
 def return_OneText():
 
-    category = request.args.get("category")
-    id = request.args.get("id")
-    number = -1
-
-    if id != None :
-        id = id.split("-")
-        category = id[0]
-        id += '0'
-        number = int(id[1])-1
-    
-    if category == None :
-        category =  select(category)
-    else :
-        category = category.split()
-        category = random.choice(category)
-        category = select(category)
-
-    url = requests.get("https://onetext.cicada000.work/" + category + ".json")
-    text = url.text
-    OneTextRaw = json.loads(text)
-
-    if number == -1:
-        number = random.randint(0,(len(OneTextRaw) - 1))
-    else :
-        number = number
-
-    OneText = OneTextRaw[number]
- 
-    return jsonify(OneText)
-
-@app.route('/pid/<pid>', methods=["GET", "POST"]) 
-
-def pid(pid):
-
-    url = f'https://open.pximg.org/works.php?uid=' + pid
+    url = f'https://open.pximg.org/works.php?uid=1096811'
 
     header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                             'Chrome/112.0.0.0 Safari/537.36',
