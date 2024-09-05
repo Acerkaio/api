@@ -8,6 +8,7 @@ app.config['JSON_AS_ASCII'] = False
 def root(pid):
 
     url = f'https://open.pximg.org/works.php?uid=' + pid
+    
 
     header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                             'Chrome/112.0.0.0 Safari/537.36',
