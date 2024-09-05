@@ -3,11 +3,11 @@ import requests , json , random
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
-@app.route('/',methods=["GET"])
+@app.route('/<pid>',methods=["GET"])
 
-def return_OneText():
+def return_OneText(pid):
 
-    url = f'https://open.pximg.org/works.php?uid=1096811'
+    url = f'https://open.pximg.org/works.php?uid='+pid
 
     header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                             'Chrome/112.0.0.0 Safari/537.36',
