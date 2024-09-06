@@ -33,11 +33,11 @@ def uid(uid):
     return json_object
 
 
-@app.route('/rk',methods=["GET"])
+@app.route('/rk/<pg>',methods=["GET"])
 
-def rk():
+def rk(pg):
 
-    url = f'https://open.pximg.org/rank.php?p=1&ps=5'
+    url = f'https://open.pximg.org/rank.php?p=' + pg
     
 
     header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
