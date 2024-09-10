@@ -1,4 +1,4 @@
-from flask import Flask , request , jsonify, redirect
+from flask import Flask , request , jsonify, redirect, url_for
 import requests , json , random
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -6,6 +6,10 @@ app.config['JSON_AS_ASCII'] = False
 @app.route('/',methods=["GET"])
 def root():
     return redirect('https://pixiv.acerkaio.top/')
+
+@app.route('/data/')
+def get_image(filename):
+    return app.send_from_directory('static/data', filename)
 
 @app.route('/uid/<uid>',methods=["GET"])
 
