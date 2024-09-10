@@ -7,10 +7,6 @@ app.config['JSON_AS_ASCII'] = False
 def root():
     return redirect('https://pixiv.acerkaio.top/')
 
-@app.route('/data')
-def get_image(filename):
-    return app.send_from_directory('static/data', filename)
-
 @app.route('/uid/<uid>',methods=["GET"])
 
 def uid(uid):

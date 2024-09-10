@@ -1,18 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "./index.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "headers": {
-        "cache-control": "no-cache, no-store, must-revalidate",
-        "Access-Control-Allow-Origin": "*"
-      },
-      "dest": "/"
-    }
+  "rewrites": [
+      { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
