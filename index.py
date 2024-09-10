@@ -91,7 +91,7 @@ def pid(pid):
 
     response = requests.get(url, headers=header)
     
-    json_object = json.loads(response.text.replace("https:\/\/i.pximg.net", "https:\/\/cf.acerkaio.top"))
+    json_object = json.loads(response.text.replace("https:\/\/i.pximg.net", "https:\/\/i.pixiv.re"))
 
     
     return json_object
