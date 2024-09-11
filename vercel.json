@@ -1,5 +1,12 @@
 {
   "rewrites": [
-      { "source": "/(.*)", "destination": "/api/index" }
+      { 
+        "source": "/(.*)", 
+        "destination": "/api/index", 
+        "headers": {
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "Access-Control-Allow-Origin": "*"
+        }
+    }
   ]
 }
