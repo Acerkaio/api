@@ -126,4 +126,4 @@ def rdom():
     result = res[number]
     fina_res = json.dumps(result,ensure_ascii=False)
 
-    return fina_res
+    return json.loads(fina_res)
