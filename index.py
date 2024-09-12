@@ -98,7 +98,7 @@ def pid(pid):
 
 @app.route('/rd',methods=["GET"])
 
-def pid(pid):
+def rdom():
 
     url = f'https://data.acerkaio.top/elaina.json'
     
