@@ -128,3 +128,62 @@ def rdom():
 
     return json.loads(fina_res)
 
+# 可选源
+sources = [
+    "魔女の旅々10000users入り",
+    "魔女の旅々5000users入り",
+    "魔女の旅々1000users入り",
+    "魔女の旅々100users入り",
+    "百合simple",
+    "百合",
+    "elaina",
+    "flat",
+    "白いストッキング",
+    "猫耳",
+    "足",
+    "けもみみ",
+    "マルチシーン"
+]
+
+# 反代选项
+proxy = "i.pixiv.re"
+
+# 基础 URL
+base_url = "https://data.acerkaio.top/"
+
+
+@app.route('/random_image')
+def get_random_image():
+    try:
+        # 随机选择一个源
+        opt = random.choice(sources)
+        url = base_url + f"{opt}/"
+
+        # 发送请求获取图片列表
+        http_response = requests.get(url)
+        if http_response.status_code == 200:
+            img_list = http_response.json()
+            # 随机选择一个图片 ID
+            id = random.randint(0, len(img_list) - 1)
+
+            # 获取图片详情
+            https_url = url + img_list[id]
+            https_response = requests.get(https_url)
+            if https_response.status_code == 200:
+                res = https_response.json()
+                if opt == "18":
+                    image_url = "https://" + proxy + res["url"]
+                else:
+                    if res["pages"] == 1:
+                        image_url = res["master"].replace("i.pximg.net", proxy)
+                    else:
+                        image_url = res["master"][0].replace("i.pximg.net", proxy)
+
+                return redirect(image_url)
+            else:
+                return "Failed to get image details", 500
+        else:
+            return "Failed to get image list", 500
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
+
