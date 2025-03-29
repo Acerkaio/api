@@ -129,13 +129,6 @@ def rdom():
     return json.loads(fina_res)
 
 
-from flask import Flask, request, jsonify, redirect
-import os
-import random
-
-app = Flask(__name__)
-
-
 @app.route('/random_image', methods=['GET'])
 def get_random_image():
     """
