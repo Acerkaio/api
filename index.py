@@ -128,50 +128,87 @@ def rdom():
 
     return json.loads(fina_res)
 
-# 可选源
-sources = [
-    "18"
-]
 
-# 反代选项
-proxy = "i.pixiv.re"
+from flask import Flask, request, jsonify, redirect
+import os
+import random
 
-# 基础 URL
-base_url = "https://data.acerkaio.top/"
+app = Flask(__name__)
 
 
-@app.route('/random_image')
+@app.route('/random_image', methods=['GET'])
 def get_random_image():
+    """
+    获取随机图片的 API 接口。
+
+    参数:
+    - opt (str): 图片源选项，默认值为 '魔女の旅々10000users入り'。
+    - proxy (str): 反代选项，默认值为 'i.pixiv.re'。
+    - redirect (bool): 是否重定向到图片，1 为是，0 为否，默认值为 0。
+
+    返回:
+    - 若 redirect 为 1，返回重定向到图片的 URL；
+    - 若 redirect 为 0，返回 JSON 格式的数据，包含图片的相关信息。
+    """
+    opt = request.args.get('opt', '魔女の旅々10000users入り')
+    proxy = request.args.get('proxy', 'i.pixiv.re')
+    redirect_flag = request.args.get('redirect', '0')
+
+    # 假设图片数据存储在以 opt 命名的文件夹中
+    base_url = f'https://data.acerkaio.top/{opt}/'
     try:
-        # 随机选择一个源
-        opt = random.choice(sources)
-        url = base_url + f"{opt}/"
+        # 获取该文件夹下的所有 JSON 文件
+        files = os.listdir(opt)
+        json_files = [f for f in files if f.endswith('.json')]
+        if not json_files:
+            return jsonify({"error": "未找到图片数据"}), 404
+        # 随机选择一个 JSON 文件
+        random_file = random.choice(json_files)
+        file_path = os.path.join(opt, random_file)
+        with open(file_path, 'r', encoding='utf-8') as f:
+            import json
+            res = json.load(f)
 
-        # 发送请求获取图片列表
-        http_response = requests.get(url)
-        if http_response.status_code == 200:
-            img_list = http_response.json()
-            # 随机选择一个图片 ID
-            id = random.randint(0, len(img_list) - 1)
-
-            # 获取图片详情
-            https_url = url + img_list[id]
-            https_response = requests.get(https_url)
-            if https_response.status_code == 200:
-                res = https_response.json()
-                if opt == "18":
-                    image_url = "https://" + proxy + res["url"]
-                else:
-                    if res["pages"] == 1:
-                        image_url = res["master"].replace("i.pximg.net", proxy)
-                    else:
-                        image_url = res["master"][0].replace("i.pximg.net", proxy)
-
+        if opt == '18':
+            image_url = f"https://{proxy}{res['url']}"
+            if redirect_flag == '1':
                 return redirect(image_url)
-            else:
-                return "Failed to get image details", 500
+            response = {
+                "pages": 1,
+                "pid": res["pid"],
+                "title": res["title"],
+                "tags": res["tags"],
+                "date": res["uploadDate"],
+                "author": res["author"],
+                "viewer_url": res["urls"]["regular"].replace("i.pixiv.re", proxy),
+                "image_url": image_url
+            }
         else:
-            return "Failed to get image list", 500
+            pages = res["pages"] - 1
+            if pages == 0:
+                idx = 0
+            else:
+                idx = random.randint(0, pages)
+            image_url = res["master"][idx].replace("i.pximg.net", proxy)
+            if redirect_flag == '1':
+                return redirect(image_url)
+            viewer_url = res["url"][idx].replace("i.pximg.net", proxy)
+            response = {
+                "pages": res["pages"],
+                "pid": res["pid"],
+                "title": res["title"],
+                "tags": res["tags"],
+                "date": res["created_time"],
+                "author": res["author"],
+                "viewer_url": viewer_url,
+                "image_url": image_url
+            }
+        return jsonify(response)
     except Exception as e:
-        return f"An error occurred: {str(e)}", 500
+        return jsonify({"error": str(e)}), 500
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
 
