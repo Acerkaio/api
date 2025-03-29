@@ -138,6 +138,7 @@ BASE_URL = "https://data.acerkaio.top/"
 def random_image():
     redirect_flag = request.args.get('redirect', default=0, type=int)
     opt = request.args.get('opt', default="魔女の旅々10000users入り", type=str)
+    master_flag = request.args.get('master', default=0, type=int)
     url = f"{BASE_URL}{opt}/"
 
     try:
@@ -154,15 +155,17 @@ def random_image():
         res = json.loads(https_response.text)
 
         if redirect_flag == 1:
+            proxy = request.args.get('proxy', default="i.pixiv.re", type=str)
             if opt == "18":
-                proxy = request.args.get('proxy', default="i.pixiv.re", type=str)
                 redirect_url = res['urls']['regular'].replace("i.pixiv.re", proxy)
                 return redirect(redirect_url)
             else:
                 pages = res.get('pages', 1)
                 idx = random.randint(0, pages - 1) if pages > 1 else 0
-                proxy = request.args.get('proxy', default="i.pixiv.re", type=str)
-                redirect_url = res['url'][idx].replace("i.pximg.net", proxy) if pages > 1 else res['url'].replace("i.pximg.net", proxy)
+                if master_flag == 1:
+                    redirect_url = res['master'][idx].replace("i.pximg.net", proxy) if pages > 1 else res['master'].replace("i.pximg.net", proxy)
+                else:
+                    redirect_url = res['url'][idx].replace("i.pximg.net", proxy) if pages > 1 else res['url'].replace("i.pximg.net", proxy)
                 return redirect(redirect_url)
         else:
             return jsonify(res)
