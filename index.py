@@ -130,74 +130,42 @@ def rdom():
     return json.loads(fina_res)
 
 
+
+BASE_URL = "https://data.acerkaio.top/"
+
+
 @app.route('/random_image', methods=['GET'])
-def get_random_image():
-    """
-    获取随机图片的 API 接口。
+def random_image():
+    redirect_flag = request.args.get('redirect', default=0, type=int)
+    opt = request.args.get('opt', default="魔女の旅々10000users入り", type=str)
+    url = f"{BASE_URL}{opt}/"
 
-    参数:
-    - opt (str): 图片源选项，默认值为 '魔女の旅々10000users入り'。
-    - proxy (str): 反代选项，默认值为 'i.pixiv.re'。
-    - redirect (bool): 是否重定向到图片，1 为是，0 为否，默认值为 0。
-
-    返回:
-    - 若 redirect 为 1，返回重定向到图片的 URL；
-    - 若 redirect 为 0，返回 JSON 格式的数据，包含图片的相关信息。
-    """
-    opt = request.args.get('opt', '魔女の旅々10000users入り')
-    proxy = request.args.get('proxy', 'i.pixiv.re')
-    redirect_flag = request.args.get('redirect', '0')
-
-    # 假设图片数据存储在以 opt 命名的文件夹中
-    base_url = f'https://data.acerkaio.top/{opt}/'
     try:
-        # 获取该文件夹下的所有 JSON 文件
-        files = os.listdir(opt)
-        json_files = [f for f in files if f.endswith('.json')]
-        if not json_files:
-            return jsonify({"error": "未找到图片数据"}), 404
-        # 随机选择一个 JSON 文件
-        random_file = random.choice(json_files)
-        file_path = os.path.join(opt, random_file)
-        with open(file_path, 'r', encoding='utf-8') as f:
-            import json
-            res = json.load(f)
+        import requests
+        http_response = requests.get(url)
+        if http_response.status_code != 200:
+            return jsonify({"error": f"Failed to fetch image list: {http_response.status_code}"}), 500
+        img_list = json.loads(http_response.text)
+        id = random.randint(0, len(img_list) - 1)
+        https_url = f"{url}{img_list[id]}"
+        https_response = requests.get(https_url)
+        if https_response.status_code != 200:
+            return jsonify({"error": f"Failed to fetch image details: {https_response.status_code}"}), 500
+        res = json.loads(https_response.text)
 
-        if opt == '18':
-            image_url = f"https://{proxy}{res['url']}"
-            if redirect_flag == '1':
-                return redirect(image_url)
-            response = {
-                "pages": 1,
-                "pid": res["pid"],
-                "title": res["title"],
-                "tags": res["tags"],
-                "date": res["uploadDate"],
-                "author": res["author"],
-                "viewer_url": res["urls"]["regular"].replace("i.pixiv.re", proxy),
-                "image_url": image_url
-            }
-        else:
-            pages = res["pages"] - 1
-            if pages == 0:
-                idx = 0
+        if redirect_flag == 1:
+            if opt == "18":
+                proxy = request.args.get('proxy', default="i.pixiv.re", type=str)
+                redirect_url = res['urls']['regular'].replace("i.pixiv.re", proxy)
+                return redirect(redirect_url)
             else:
-                idx = random.randint(0, pages)
-            image_url = res["master"][idx].replace("i.pximg.net", proxy)
-            if redirect_flag == '1':
-                return redirect(image_url)
-            viewer_url = res["url"][idx].replace("i.pximg.net", proxy)
-            response = {
-                "pages": res["pages"],
-                "pid": res["pid"],
-                "title": res["title"],
-                "tags": res["tags"],
-                "date": res["created_time"],
-                "author": res["author"],
-                "viewer_url": viewer_url,
-                "image_url": image_url
-            }
-        return jsonify(response)
+                pages = res.get('pages', 1)
+                idx = random.randint(0, pages - 1) if pages > 1 else 0
+                proxy = request.args.get('proxy', default="i.pixiv.re", type=str)
+                redirect_url = res['url'][idx].replace("i.pximg.net", proxy) if pages > 1 else res['url'].replace("i.pximg.net", proxy)
+                return redirect(redirect_url)
+        else:
+            return jsonify(res)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
